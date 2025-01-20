@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-import o
+import os
 
 
 def inspeccionar_fitxer(path):
