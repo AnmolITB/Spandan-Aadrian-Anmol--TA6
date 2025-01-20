@@ -18,7 +18,6 @@ def inspeccionar_fitxer(path):
     except Exception as e:
         print(f"Error al llegir l'arxiu {path}: {e}")
 
-
 def validar_format(files):
     """
     Valida el format dels fitxers i verifica consistència de dades.
@@ -66,7 +65,7 @@ fitxer = '../EO1/precip.MIROC5.RCP60.2006-2100.SDSM_REJ'
 inspeccionar_fitxer(fitxer)
 
 files = [
-    '../EO1/precip.MIROC5.RCP60.2006-2100.SDSM_REJ'
+    '../EO1/precip.MIROC5.RCP60.2006-2100.SDSM_REJ/precip.P1.MIROC5.RCP60.2006-2100.REGRESION.dat'
 ]
 resultats = validar_format(files)
 
