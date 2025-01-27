@@ -2,112 +2,90 @@ import pandas as pd
 import os
 import logging
 
-logging.basicConfig(filename='dades_analisi.log', level=logging.INFO,
+# Configure logging
+logging.basicConfig(filename='data_analysis.log', level=logging.INFO,
                    format='%(asctime)s:%(levelname)s:%(message)s')
 
-def inspeccionar_fitxer(path, n_lines=5):
-    try:
-        if not os.path.exists(path):
-            logging.error(f"El fitxer {path} no existeix.")
-            return
-        with open(path, 'r') as f:
-            logging.info(f"Inspeccionant les primeres {n_lines} línies del fitxer: {path}")
-            for _ in range(n_lines):
-                print(f.readline().strip())
-    except FileNotFoundError:
-        logging.error(f"Error: El fitxer {path} no existeix.")
-    except Exception as e:
-        logging.error(f"Error al llegir l'arxiu {path}: {e}")
+def read_and_validate_files(folder_path):
+    files = [os.path.join(folder_path, file) for file in os.listdir(folder_path) if file.endswith('.dat')]
+    valid_files = []
+    for file in files:
+        try:
+            df = pd.read_csv(file, sep=None, engine='python', nrows=5)
+            logging.info(f"File {file} read successfully with columns: {df.columns}")
+            valid_files.append(file)
+        except Exception as e:
+            logging.error(f"Error reading file {file}: {e}")
+    return valid_files
 
-def calcular_estadistiques(df):
+def process_file(file):
     try:
+        df = pd.read_csv(file, sep=None, engine='python')
         df.replace(-999, pd.NA, inplace=True)
-        if 'Year' not in df.columns or 'Precipitation' not in df.columns:
-            logging.error("Faltan columnas necesarias en el DataFrame.")
-            return None
-        percentatge_dades_mancants = df.isna().mean() * 100
-        precipitacio_anual = df.groupby('Year')['Precipitation'].agg(['sum', 'mean'])
-        total_datos = df.shape[0]
-        total_dias_sin_registro = df['Precipitation'].isna().sum()
-        promedio_anual_precipitaciones = precipitacio_anual['mean'].mean()
-        return {
-            'total_datos': total_datos,
-            'total_dias_sin_registro': total_dias_sin_registro,
-            'porcentaje_anual_dias_sin_registro': (total_dias_sin_registro / total_datos) * 100,
-            'promedio_anual_precipitaciones': promedio_anual_precipitaciones,
-            'precipitacio_anual': precipitacio_anual
-        }
+        return df
     except Exception as e:
-        logging.error(f"Error al calcular estadístiques: {e}")
+        logging.error(f"Error processing file {file}: {e}")
         return None
 
-def validar_format(files):
-    informes = []
-    total_files = len(files)
-    files_with_mistakes = 0
-    for file in files:
-        if not os.path.exists(file):
-            informes.append((file, "Error: El fitxer no existeix"))
-            logging.error(f"El fitxer {file} no existeix.")
-            files_with_mistakes += 1
-            continue
-        try:
-            df = pd.read_csv(file, sep=None, engine='python')
-            logging.info(f"Validant el fitxer: {file}")
-            tipus_dades = df.dtypes
-            logging.info(f"Tipus de dades per columna: {tipus_dades}")
-            valors_nuls = df.isnull().sum()
-            logging.info(f"Valors nuls per columna: {valors_nuls}")
-            valors_corruptes = (df == -999).sum().to_dict()
-            logging.info(f"Valors corruptes (-999) per columna: {valors_corruptes}")
-            if len(set(df.apply(len))) != 1:
-                logging.warning(f"Inconsistència en el nombre de valors per columna al fitxer {file}")
-                files_with_mistakes += 1
-            expected_months = list(range(1, 13))
-            actual_months = df['Month'].unique().tolist()
-            if sorted(actual_months) != expected_months:
-                logging.error(f"Error: El fitxer {file} no té els 12 mesos en ordre correcte")
-                informes.append((file, "Error: Els mesos no estan en ordre correcte"))
-                files_with_mistakes += 1
-            else:
-                estadistiques = calcular_estadistiques(df)
-                if estadistiques:
-                    informes.append((file, estadistiques))
-        except Exception as e:
-            informes.append((file, None, f"Error: {e}"))
-            logging.error(f"Error al processar el fitxer {file}: {e}")
-            files_with_mistakes += 1
-    processing_percent = (total_files - files_with_mistakes) / total_files * 100
-    return informes, total_files, files_with_mistakes, processing_percent
+def calculate_statistics(df):
+    try:
+        total_data = df.size
+        total_missing_values = df.isna().sum().sum()
+        total_non_missing_values = total_data - total_missing_values
+        total_zeros = (df == 0).sum().sum()
+        total_values = total_non_missing_values + total_missing_values
 
-def processar_carpeta(folder_path):
-    files = [os.path.join(folder_path, file) for file in os.listdir(folder_path) if file.endswith('.dat')]
-    resultats, total_files, files_with_mistakes, processing_percent = validar_format(files)
-    if total_files == 0:
-        print("No se encontraron archivos para procesar.")
+        return {
+            'total_data': total_data,
+            'total_missing_values': total_missing_values,
+            'total_non_missing_values': total_non_missing_values,
+            'total_zeros': total_zeros,
+            'total_values': total_values
+        }
+    except Exception as e:
+        logging.error(f"Error calculating statistics: {e}")
+        return None
+
+def process_folder(folder_path):
+    valid_files = read_and_validate_files(folder_path)
+    if not valid_files:
+        print("No valid files found to process.")
         return
-    total_datos = sum(r[1]['total_datos'] for r in resultats if r[1] is not None)
-    total_dias_sin_registro = sum(r[1]['total_dias_sin_registro'] for r in resultats if r[1] is not None)
-    porcentaje_anual_dias_sin_registro = sum(
-        r[1]['porcentaje_anual_dias_sin_registro'] for r in resultats if r[1] is not None) / total_files
-    promedio_anual_precipitaciones = sum(
-        r[1]['promedio_anual_precipitaciones'] for r in resultats if r[1] is not None) / total_files
-    with open('datos.txt', 'w') as f:
-        f.write(f"Total datos: {total_datos}\n")
-        f.write(f"Total días sin registro: {total_dias_sin_registro}\n")
-        f.write(f"Porcentaje anual de días sin registro: {porcentaje_anual_dias_sin_registro:.2f}%\n")
-        f.write(f"Promedio anual de precipitaciones: {promedio_anual_precipitaciones:.2f}\n")
-        f.write("\nEvolución anual de la precipitación media:\n")
-        f.write("Año\tPrecipitación Media (L/m²)\n")
-        for file, data in resultats:
-            if data and 'precipitacio_anual' in data:
-                precipitacio_anual = data['precipitacio_anual']
-                for year, stats in precipitacio_anual.iterrows():
-                    f.write(f"{year}\t{stats['mean']:.2f}\n")
-    print(f"\nTotal datos: {total_datos}")
-    print(f"Total días sin registro: {total_dias_sin_registro}")
-    print(f"Porcentaje anual de días sin registro: {porcentaje_anual_dias_sin_registro:.2f}%")
-    print(f"Promedio anual de precipitaciones: {promedio_anual_precipitaciones:.2f}")
 
-folder_path = '../EO1/precip.MIROC5.RCP60.2006-2100.SDSM_REJ'
-processar_carpeta(folder_path)
+    all_stats = []
+    for file in valid_files:
+        df = process_file(file)
+        if df is not None:
+            stats = calculate_statistics(df)
+            if stats:
+                all_stats.append(stats)
+            else:
+                logging.warning(f"No statistics calculated for file {file}")
+        else:
+            logging.warning(f"File {file} could not be processed")
+
+    if not all_stats:
+        print("No statistics calculated.")
+        return
+
+    total_data = sum(stat['total_data'] for stat in all_stats)
+    total_missing_values = sum(stat['total_missing_values'] for stat in all_stats)
+    total_non_missing_values = sum(stat['total_non_missing_values'] for stat in all_stats)
+    total_zeros = sum(stat['total_zeros'] for stat in all_stats)
+    total_values = sum(stat['total_values'] for stat in all_stats)
+
+    with open('data_summary.txt', 'w') as f:
+        f.write(f"Total data: {total_data}\n")
+        f.write(f"Total missing values: {total_missing_values}\n")
+        f.write(f"Total non-missing values: {total_non_missing_values}\n")
+        f.write(f"Total zeros: {total_zeros}\n")
+        f.write(f"Total values: {total_values}\n")
+
+    print(f"\nTotal data: {total_data}")
+    print(f"Total missing values: {total_missing_values}")
+    print(f"Total non-missing values: {total_non_missing_values}")
+    print(f"Total zeros: {total_zeros}")
+    print(f"Total values: {total_values}")
+
+folder_path = '../EO1/precip.MIROC5.RCP60.2006-2100.SDSM_REJ/'
+process_folder(folder_path)
