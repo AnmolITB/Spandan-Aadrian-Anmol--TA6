@@ -34,13 +34,17 @@ def calculate_statistics(df):
         total_non_missing_values = total_data - total_missing_values
         total_zeros = (df == 0).sum().sum()
         total_values = total_non_missing_values + total_missing_values
+        total_days = df.shape[0]
+        days_without_registry = df.isna().all(axis=1).sum()
 
         return {
             'total_data': total_data,
             'total_missing_values': total_missing_values,
             'total_non_missing_values': total_non_missing_values,
             'total_zeros': total_zeros,
-            'total_values': total_values
+            'total_values': total_values,
+            'total_days': total_days,
+            'days_without_registry': days_without_registry
         }
     except Exception as e:
         logging.error(f"Error calculating statistics: {e}")
@@ -73,6 +77,11 @@ def process_folder(folder_path):
     total_non_missing_values = sum(stat['total_non_missing_values'] for stat in all_stats)
     total_zeros = sum(stat['total_zeros'] for stat in all_stats)
     total_values = sum(stat['total_values'] for stat in all_stats)
+    total_days = sum(stat['total_days'] for stat in all_stats)
+    days_without_registry = sum(stat['days_without_registry'] for stat in all_stats)
+
+    percentage_processed_data = (total_non_missing_values / total_data) * 100
+    percentage_days_without_registry = (days_without_registry / total_days) * 100
 
     with open('data_summary.txt', 'w') as f:
         f.write(f"Total data: {total_data}\n")
@@ -80,12 +89,16 @@ def process_folder(folder_path):
         f.write(f"Total non-missing values: {total_non_missing_values}\n")
         f.write(f"Total zeros: {total_zeros}\n")
         f.write(f"Total values: {total_values}\n")
+        f.write(f"Percentage of processed data: {percentage_processed_data:.2f}%\n")
+        f.write(f"Percentage of days without registry: {percentage_days_without_registry:.2f}%\n")
 
     print(f"\nTotal data: {total_data}")
     print(f"Total missing values: {total_missing_values}")
     print(f"Total non-missing values: {total_non_missing_values}")
     print(f"Total zeros: {total_zeros}")
     print(f"Total values: {total_values}")
+    print(f"Percentage of processed data: {percentage_processed_data:.2f}%")
+    print(f"Percentage of days without registry: {percentage_days_without_registry:.2f}%")
 
 folder_path = '../EO1/precip.MIROC5.RCP60.2006-2100.SDSM_REJ/'
 process_folder(folder_path)
