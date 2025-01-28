@@ -1,4 +1,3 @@
-
 import pandas as pd
 import os
 import logging
@@ -38,6 +37,9 @@ def calculate_statistics(df):
         total_days = df.shape[0]
         days_without_registry = df.isna().all(axis=1).sum()
         total_words = (df.apply(lambda col: col.map(lambda x: isinstance(x, str))).sum().sum())
+        total_missing_999 = (df == -999).sum().sum()
+        percentage_missing_999 = (total_missing_999 / total_data) * 100
+
         return {
             'total_data': total_data,
             'total_missing_values': total_missing_values,
@@ -46,7 +48,9 @@ def calculate_statistics(df):
             'total_values': total_values,
             'total_days': total_days,
             'days_without_registry': days_without_registry,
-            'total_words': total_words
+            'total_words': total_words,
+            'total_missing_999': total_missing_999,
+            'percentage_missing_999': percentage_missing_999
         }
     except Exception as e:
         logging.error(f"Error calculating statistics: {e}")
@@ -82,6 +86,8 @@ def process_folder(folder_path):
     total_days = sum(stat['total_days'] for stat in all_stats)
     days_without_registry = sum(stat['days_without_registry'] for stat in all_stats)
     total_words = sum(stat['total_words'] for stat in all_stats)
+    total_missing_999 = sum(stat['total_missing_999'] for stat in all_stats)
+    percentage_missing_999 = (total_missing_999 / total_data) * 100
 
     percentage_processed_data = (total_non_missing_values / total_values) * 100
     percentage_days_without_registry = (days_without_registry / total_days) * 100
@@ -93,6 +99,8 @@ def process_folder(folder_path):
         f.write(f"Total zeros: {total_zeros}\n")
         f.write(f"Total values: {total_values}\n")
         f.write(f"Total words: {total_words}\n")
+        f.write(f"Total missing -999 values: {total_missing_999}\n")
+        f.write(f"Percentage of missing -999 values: {percentage_missing_999:.2f}%\n")
         f.write(f"Percentage of processed data: {percentage_processed_data:.2f}%\n")
         f.write(f"Percentage of days without registry: {percentage_days_without_registry:.2f}%\n")
 
@@ -102,9 +110,11 @@ def process_folder(folder_path):
     print(f"Total zeros: {total_zeros}")
     print(f"Total values: {total_values}")
     print(f"Total words: {total_words}")
+    print(f"Total missing -999 values: {total_missing_999}")
+    print(f"Percentage of missing -999 values: {percentage_missing_999:.2f}%")
     print(f"Percentage of processed data: {percentage_days_without_registry:.2f}%")
     print(f"Percentage of days without registry: {percentage_processed_data:.2f}%")
 
-
+# 12 mesos de 312 dias
 folder_path = '../EO1/precip.MIROC5.RCP60.2006-2100.SDSM_REJ/'
 process_folder(folder_path)
