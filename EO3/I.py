@@ -112,7 +112,7 @@ def process_folder(folder_path):
     summary_df = pd.DataFrame([summary])
     summary_df.to_csv('data_summary.csv', index=False)
 
-    # Plot graphs
+
     plt.figure(figsize=(10, 6))
     plt.bar(summary.keys(), summary.values())
     plt.xticks(rotation=45, ha='right')
