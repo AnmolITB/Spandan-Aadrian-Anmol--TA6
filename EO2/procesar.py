@@ -1,6 +1,7 @@
 import pandas as pd
 import os
 import logging
+import matplotlib.pyplot as plt
 
 # Configure logging
 logging.basicConfig(filename='data_analysis.log', level=logging.INFO,
@@ -91,29 +92,35 @@ def process_folder(folder_path):
     percentage_processed_data = (total_non_missing_values / total_values) * 100
     percentage_days_without_registry = (days_without_registry / total_days) * 100
 
-    with open('data_summary.txt', 'w') as f:
-        f.write(f"Total data: {total_data}\n")
-        f.write(f"Total missing values: {total_missing_values}\n")
-        f.write(f"Total non-missing values: {total_non_missing_values}\n")
-        f.write(f"Total zeros: {total_zeros}\n")
-        f.write(f"Total values: {total_values}\n")
-        f.write(f"Total words: {total_words}\n")
-        f.write(f"Total missing -999 values: {total_missing_999}\n")
-        f.write(f"Percentage of missing -999 values: {percentage_missing_999:.2f}%\n")
-        f.write(f"Percentage of processed data: {percentage_processed_data:.2f}%\n")
-        f.write(f"Percentage of days without registry: {percentage_days_without_registry:.2f}%\n")
+    summary = {
+        'Total data': total_data,
+        'Total missing values': total_missing_values,
+        'Total non-missing values': total_non_missing_values,
+        'Total zeros': total_zeros,
+        'Total values': total_values,
+        'Total words': total_words,
+        'Total missing -999 values': total_missing_999,
+        'Percentage of missing -999 values': percentage_missing_999,
+        'Percentage of processed data': percentage_processed_data,
+        'Percentage of days without registry': percentage_days_without_registry
+    }
 
-    print(f"\nTotal data: {total_data}")
-    print(f"Total missing values: {total_missing_values}")
-    print(f"Total non-missing values: {total_non_missing_values}")
-    print(f"Total zeros: {total_zeros}")
-    print(f"Total values: {total_values}")
-    print(f"Total words: {total_words}")
-    print(f"Total missing -999 values: {total_missing_999}")
-    print(f"Percentage of missing -999 values: {percentage_missing_999:.2f}%")
-    print(f"Percentage of processed data: {percentage_processed_data:.2f}%")
-    print(f"Percentage of days without registry: {percentage_days_without_registry:.2f}%")
+    # Display summary on screen
+    for key, value in summary.items():
+        print(f"{key}: {value}")
 
-# 12 mesos de 312 dias
+    # Export summary to CSV
+    summary_df = pd.DataFrame([summary])
+    summary_df.to_csv('data_summary.csv', index=False)
+
+    # Plot graphs
+    plt.figure(figsize=(10, 6))
+    plt.bar(summary.keys(), summary.values())
+    plt.xticks(rotation=45, ha='right')
+    plt.title('Statistical Summary')
+    plt.tight_layout()
+    plt.show()
+
+# Example usage
 folder_path = '../EO1/precip.MIROC5.RCP60.2006-2100.SDSM_REJ/'
 process_folder(folder_path)
