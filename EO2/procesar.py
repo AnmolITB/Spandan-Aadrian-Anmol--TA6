@@ -21,7 +21,6 @@ def read_and_validate_files(folder_path):
 def process_file(file):
     try:
         df = pd.read_csv(file, sep=None, engine='python')
-        df.replace(-999, pd.NA, inplace=True)
         return df
     except Exception as e:
         logging.error(f"Error processing file {file}: {e}")
@@ -112,8 +111,8 @@ def process_folder(folder_path):
     print(f"Total words: {total_words}")
     print(f"Total missing -999 values: {total_missing_999}")
     print(f"Percentage of missing -999 values: {percentage_missing_999:.2f}%")
-    print(f"Percentage of processed data: {percentage_days_without_registry:.2f}%")
-    print(f"Percentage of days without registry: {percentage_processed_data:.2f}%")
+    print(f"Percentage of processed data: {percentage_processed_data:.2f}%")
+    print(f"Percentage of days without registry: {percentage_days_without_registry:.2f}%")
 
 # 12 mesos de 312 dias
 folder_path = '../EO1/precip.MIROC5.RCP60.2006-2100.SDSM_REJ/'
