@@ -104,7 +104,6 @@ def process_folder(folder_path):
         'Percentage of processed data': percentage_processed_data,
         'Percentage of days without registry': percentage_days_without_registry
     }
-
     # Display summary on screen
     for key, value in summary.items():
         print(f"{key}: {value}")
