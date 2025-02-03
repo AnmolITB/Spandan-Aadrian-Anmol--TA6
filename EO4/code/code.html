@@ -1,21 +1,23 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistical Summary</title>
+    <title>Resums estadistics</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>Statistical Summary</h1>
+    <h1>grafic estandistics</h1>
     <div class="summary">
         {% for key, value in summary.items() %}
             <p><strong>{{ key }}:</strong> {{ value }}</p>
         {% endfor %}
     </div>
     <div class="graph">
-        <img src="{{ url_for('static', filename='summary_graph.png') }}" alt="Summary Graph">
+        <img src="../img/Figure_1.png" alt="Summary Graph">
+    </div>
+    <div class="download">
+        <a href="../EO3/data_summary.csv" download>Download CS</a>
     </div>
 </body>
 </html>

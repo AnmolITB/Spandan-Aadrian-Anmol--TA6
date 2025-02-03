@@ -112,12 +112,13 @@ def process_folder(folder_path):
     summary_df = pd.DataFrame([summary])
     summary_df.to_csv('data_summary.csv', index=False)
 
-
+    # Plot and save the summary graph
     plt.figure(figsize=(10, 6))
     plt.bar(summary.keys(), summary.values())
     plt.xticks(rotation=45, ha='right')
     plt.title('Statistical Summary')
     plt.tight_layout()
+    plt.savefig('summary_graph.png')  # Save the figure as a PNG file
     plt.show()
 
 # Example usage
