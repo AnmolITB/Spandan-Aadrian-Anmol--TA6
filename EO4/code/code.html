@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Resums estadistics</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='EO4/css/ex4.css') }}">
 </head>
 <body>
-    <h1>grafic estandistics</h1>
+    <h1> estandistics</h1>
     <div class="summary">
         {% for key, value in summary.items() %}
             <p><strong>{{ key }}:</strong> {{ value }}</p>
@@ -16,8 +16,14 @@
     <div class="graph">
         <img src="../img/Figure_1.png" alt="Summary Graph">
     </div>
-    <div class="download">
-        <a href="../EO3/data_summary.csv" download>Download CS</a>
+    <div class="graph-summary">
+        <h2>Graph Summary</h2>
+        <ul>
+            <li>Total data points: {{ graph_summary.total_data_points }}</li>
+            <li>Mean value: {{ graph_summary.mean_value }}</li>
+            <li>Median value: {{ graph_summary.median_value }}</li>
+            <li>Standard deviation: {{ graph_summary.std_deviation }}</li>
+        </ul>
     </div>
 </body>
 </html>

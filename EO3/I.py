@@ -121,6 +121,6 @@ def process_folder(folder_path):
     plt.savefig('summary_graph.png')  # Save the figure as a PNG file
     plt.show()
 
-# Example usage
+
 folder_path = '../EO1/precip.MIROC5.RCP60.2006-2100.SDSM_REJ/'
 process_folder(folder_path)

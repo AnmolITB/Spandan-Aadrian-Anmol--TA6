@@ -1,28 +1,100 @@
+/* ex4.css */
+from flask import Flask, render_template
+import pandas as pd
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    summary = {
+        'Total Sales': 1000,
+        'Total Customers': 150,
+    }
+
+    # Read data from CSV file
+    csv_file_path = 'static/EO3/data_summary.csv'
+    df = pd.read_csv(csv_file_path)
+    graph_summary = {
+        'total_data_points': df['Total data'].iloc[0],
+        'mean_value': df['Total non-missing values'].iloc[0] / df['Total data'].iloc[0],
+        'median_value': df['Total non-missing values'].median(),
+        'std_deviation': df['Total non-missing values'].std(),
+    }
+
+    return render_template('index.html', summary=summary, graph_summary=graph_summary)
+
+if __name__ == '__main__':
+
+    app.run(debug=True)
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 20px;
+    padding: 0;
     background-color: #f4f4f4;
 }
 
 h1 {
     text-align: center;
+    color: #333;
+    margin-top: 20px;
 }
 
 .summary {
-    margin: 20px auto;
-    width: 80%;
-    background-color: #fff;
+    margin: 20px;
     padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.summary p {
+    margin: 10px 0;
+    font-size: 16px;
 }
 
 .graph {
     text-align: center;
-    margin: 20px auto;
+    margin: 20px;
 }
 
-.graph img {
-    max-width: 100%;
-    height: auto;
+.csv-data {
+    margin: 20px;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.csv-data table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.csv-data th, .csv-data td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.csv-data th {
+    background-color: #f2f2f2;
+    color: #333;
+}
+
+.download {
+    text-align: center;
+    margin: 20px;
+}
+
+.download a {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    text-decoration: none;
+    border-radius: 5px;
+}
+
+.download a:hover {
+    background-color: #0056b3;
 }
